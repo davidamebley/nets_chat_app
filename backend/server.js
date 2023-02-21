@@ -1,104 +1,91 @@
-const express = require('express');
-require('dotenv').config();
 const http = require('http');
-const Websocket = require('ws');
+const express = require('express');
+const socketIO = require('socket.io');
+const bodyParser = require('body-parser');
 
-const PORT = process.env.PORT || 5000;
-const server = http.createServer(express);
-const wss = new Websocket.Server({ server });
+const {checkPortInUse} = require('./helpers/functions');
 
+const app = express();
+const httpServer = http.createServer(app);
 
-// We keep track of the connected clients
-let clients = [];
+// Parse incoming request bodies in a middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// When a websocket client connects to our Server
-wss.on("connection", (ws, req) =>{
-    console.log("A new websocket client has connected");
+// Define a POST route that accepts input values
+app.post('/connect', async (req, res) => {
+    const { serverUrl } = req.body;
+    const socketPort = new URL(serverUrl).port;
 
-    // Add new websocket client to connected clients
-    clients.push(ws);
-
-    // Manage incoming messages from the Websocket client
-    ws.on("message", (message) =>{
-        console.log(`A new message received: "${message}"`);
-
-        // Parse the message
-        let data;
+    if (serverUrl) {
+        console.log('Received server address:', serverUrl);
+    
         try {
-            // Convert message JSON string to object
-            data = JSON.parse(message);
-        } catch (error) {
-            console.log(`Error while parsing message: ${message}`);
+          const inUse = await checkPortInUse(socketPort);
+    
+          if (inUse) {
+            console.log('Port already in use.');
+            res.status(405).send('Port already in use.');   //Operation not allowed
             return;
-        }
-
-        // Manage 'login-type' messages
-        if (data.login) {
-            const username = data.login.username;
-            const location = data.login.location;
-            console.log(`User ${username} has connected from ${location}`);
-
-            // Broadcast login message to all other connected clients
-            const message = {
-                message: {
-                    text: `User ${username} has connected from ${location}`
-                }
-            };
-            broadcast(JSON.stringify(message));
-        }
-
-        // Manage chat messages
-        if (data.message) {
-            const username = getUsername(ws);
-
-            if (!username) {
-                console.log('Error: Client not logged in')
-                return;
+          }
+    
+          console.log('Outside reached');
+    
+          const io = socketIO(httpServer, {
+            cors: {
+              origin: '*',
+              methods: ['GET', 'POST', 'OPTIONS']
             }
+          });
+    
+          io.listen(socketPort);
+    
+          res.status(200).send('WebSocket connection established');
+    
+          io.on('connection', (socket) => {
+            console.log('WebSocket connection established');
+    
+            socket.on('message', (data) => {
+                const receivedMessage = JSON.stringify(data);
+                console.log(`Received message: ${receivedMessage}`);
+                io.emit('message', receivedMessage);
+            });
 
-            const messageText = data.message.text;
-            console.log(`${username} sent: ${messageText}`);
-
-            // Broadcast message text to all other connected clients
-            const message = {
-                message: {
-                    text: `${username} sent: ${messageText}`
-                }
-            };
-            broadcast(JSON.stringify(message));
+            socket.on('login', (data) =>{
+                const username = data.login.username;
+                const location = data.login.location;
+                console.log(`New Login: ${data.login.username}`);
+                io.emit('login', JSON.stringify(
+                    {
+                        message:{
+                            text: `${username} connected from ${location}`,
+                        }
+                    }
+                ));
+            })
+    
+            socket.on('disconnect', () => {
+              console.log('WebSocket connection closed');
+            });
+          });
+    
+          io.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+              console.error('Port already in use:', error);
+            } else {
+              console.error('WebSocket server error:', error);
+            }
+          });
+        } catch (error) {
+          console.error('Error checking if port is in use:', error);
+          res.status(500).send('Error checking if port is in use');
         }
-    });
-
-    // Manage Websocket disconnections
-    ws.on("close", () =>{
-        console.log('Client diconnected');
-
-        // Update client list
-        clients = clients.filter((client) => client !== ws);
-    });
+      } else {
+        res.status(400).send('Invalid server URL');
+      }
 });
 
-// Function to broadcast message notifications to connected clients
-const broadcast = (message) =>{
-    clients.forEach((client) => {
-        // If client connected
-        if (client.readyState === Websocket.OPEN) {
-            client.send(message);
-        }
-    });
-}
 
-// Function to get Username from client
-const getUsername = (client) =>{
-    for (const [username, ws] of Object.entries(wss.clients)) {
-        if (client === ws) {
-            return username;
-        }
-    }
-    return null;
-}
-
-// Start server
-server.listen(PORT, () =>{
-    console.log(`Server is listening on port ${PORT}`);
-})
+httpServer.listen(8000, () => {
+  console.log('HTTP server listening on port 8000');
+});

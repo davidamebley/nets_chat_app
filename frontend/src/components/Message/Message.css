@@ -1,0 +1,21 @@
+.message {
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.current-user {
+  background-color: #dbf3fa;
+}
+
+.username {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.message-text {
+  margin-top: 5px;
+}
