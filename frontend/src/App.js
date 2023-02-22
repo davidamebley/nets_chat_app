@@ -15,13 +15,14 @@ function App() {
   const [serverUrl, setServerUrl] = useState(SERVER_URL);
   const [isServerError, setIsServerError] = useState(false);
   const [errorText, setErrorText] = useState('');
-  const [geoLocation, setGeoLocation] = useState('');
+  const [geoLocation, setGeoLocation] = useState('Unknown location');
   const [login, setLogin] = useState({});
 
   useEffect(() => {
     if (socket) {
       socket.on('connect', () => {
         console.log(`Connected to server at ${serverUrl}`);
+        console.log(`Socket ID: ${socket.id}`);
       });
 
       socket.on('disconnect', () => {
@@ -33,15 +34,15 @@ function App() {
         setMessages((messages) => [...messages, message]);
       });
     }
-    // Clean up the socket connection on component unmount 
-    /* return () => { 
-      socket.disconnect(); 
-    }; */
+
+    // console.log(`Checked Login location: ${geoLocation}`);
+    getCurrentLocation();
+    
   }, [socket]);
 
   // Function to handle Login connections
   const handleLogin = (serverAddress, username) => {
-    console.log(`Login location: ${getCurrentLocation()}`);
+    // console.log(`Login location: ${getCurrentLocation()}`);
     setServerUrl(serverAddress);
     if (socket) {
       socket.disconnect();
@@ -99,6 +100,38 @@ function App() {
         console.error(error);
       });
   };
+
+  // Function to get Geolocation
+  const getCurrentLocation = () =>{
+    if (navigator.geolocation) {
+        // Get the user's current position
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          setGeoLocation(`${latitude}, ${longitude}`)
+        }, (error) => {
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              console.error("User denied the request for Geolocation.");
+              break;
+            case error.POSITION_UNAVAILABLE:
+              console.error("Location information is unavailable.");
+              break;
+            case error.TIMEOUT:
+              console.error("The request to get user location timed out.");
+              break;
+            case error.UNKNOWN_ERROR:
+              console.error("An unknown error occurred.");
+              break;
+            default:
+              console.error("An unknown error occurred.");
+              setGeoLocation('Unknown location.')
+          }
+        });
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+      }
+}
 
   return (
     <div className="App">

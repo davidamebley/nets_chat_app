@@ -48,6 +48,8 @@ app.post('/connect', async (req, res) => {
             socket.on('message', (data) => {
                 const receivedMessage = JSON.stringify(data);
                 console.log(`Received message: ${receivedMessage}`);
+                // Broadcast to ALL clients
+                console.log(`User ID of message: ${data.message.userId}`)
                 io.emit('message', receivedMessage);
             });
 
@@ -55,7 +57,8 @@ app.post('/connect', async (req, res) => {
                 const username = data.login.username;
                 const location = data.login.location;
                 console.log(`New Login: ${data.login.username}`);
-                io.emit('login', JSON.stringify(
+                // Broadcast to other clients
+                socket.broadcast.emit('login', JSON.stringify(
                     {
                         message:{
                             text: `${username} connected from ${location}`,

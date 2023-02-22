@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+/*** First Backup
+ * 
+ * import React, { useState, useEffect } from 'react';
 import './Chat.css';
 
 const Chat = ({ socket, username }) => {
@@ -48,18 +50,7 @@ const Chat = ({ socket, username }) => {
       <h1 className="chat-header">Chat</h1>
       <ul className="chat-history">
         {chatHistory.map((entry, index) => (
-          <li 
-            key={index} 
-            className={
-              entry.type === 'login'
-                  ? 'login-notification'
-                  : entry.sender === socket.id
-                  ? 'chat-message chat-message-right'
-                  : 'chat-message chat-message-left'
-            }
-          >
-            {entry.message.text}
-          </li>
+          <li key={index} className="chat-message">{entry.message.text}</li>
         ))}
       </ul>
       <form onSubmit={handleMessageSubmit} className="chat-form">
@@ -76,3 +67,8 @@ const Chat = ({ socket, username }) => {
 }
 
 export default Chat;
+ */
+
+
+
+// Second Backup
