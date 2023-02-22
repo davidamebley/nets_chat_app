@@ -4,7 +4,6 @@ import io from 'socket.io-client';
 import './App.css';
 import LoginForm from './components/LoginForm/LoginForm';
 import Chat from './components/Chat/Chat';
-import {getCurrentLocation} from './helpers/functions';
 
 const SERVER_URL = 'http://localhost:8080';
 
@@ -23,10 +22,6 @@ function App() {
       socket.on('connect', () => {
         console.log(`Connected to server at ${serverUrl}`);
         console.log(`Socket ID: ${socket.id}`);
-      });
-
-      socket.on('disconnect', () => {
-        console.log('Disconnected from server');
       });
 
       socket.on('message', (message) => {

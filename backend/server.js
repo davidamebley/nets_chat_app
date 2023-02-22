@@ -50,7 +50,16 @@ app.post('/connect', async (req, res) => {
                 console.log(`Received message: ${receivedMessage}`);
                 // Broadcast to ALL clients
                 console.log(`User ID of message: ${data.message.userId}`)
-                io.emit('message', receivedMessage);
+                // io.emit('message', receivedMessage);
+                io.emit('message', JSON.stringify(
+                    {
+                        type: 'chat',
+                        message: {
+                            userId: data.message.userId,
+                            text: data.message.text
+                        }
+                    }
+                ));
             });
 
             socket.on('login', (data) =>{
@@ -59,16 +68,39 @@ app.post('/connect', async (req, res) => {
                 console.log(`New Login: ${data.login.username}`);
                 // Broadcast to other clients
                 socket.broadcast.emit('login', JSON.stringify(
-                    {
+                    {   type: 'login',
                         message:{
                             text: `${username} connected from ${location}`,
                         }
                     }
                 ));
-            })
+
+                socket.username = data.login.username;
+            });
+
+
+            //Listen for typing event
+            socket.on('userTyping', (username)=>{
+                // Emit typing status to other users
+                socket.broadcast.emit('userTypingBroadcast', username);
+            });
+            //Listen for stopped typing event
+            socket.on('userStoppedTyping', ()=>{
+                // Emit typing stopped status to other users
+                socket.broadcast.emit('userStoppedTypingBroadcast', '');
+            });
+
     
-            socket.on('disconnect', () => {
+            socket.on('disconnect', (data) => {
               console.log('WebSocket connection closed');
+              socket.broadcast.emit('logout', JSON.stringify(
+                {
+                    type: 'logout',
+                    message:{
+                        text: `${socket.username} left the chat`
+                    }
+                }
+              ))
             });
           });
     
