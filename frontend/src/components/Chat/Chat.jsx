@@ -4,12 +4,14 @@ import './Chat.css';
 const Chat = ({ socket, username }) => {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
-  const chatHistoryRef = useRef(null);
+  const [textBoxElement, setTextBoxElement] = useState(null)
   const chatInputRef = useRef(null);
-  const typingStatusElement = document.getElementById('typing-status')
   let typingTimerId;
 
   useEffect(() => {
+    // Create rep of textbox element
+    setTextBoxElement(chatInputRef.current);
+
     socket.on('message', (data) => {
       // Append new message to the chat history
       const newMessage = JSON.parse(data)
@@ -22,11 +24,17 @@ const Chat = ({ socket, username }) => {
       setChatHistory((prevHistory) => [...prevHistory, newMessage]);
     });
 
+    socket.on('logout', (data) => {
+      // Append logout notification to the chat history
+      const newMessage = JSON.parse(data)
+      setChatHistory((prevHistory) => [...prevHistory, newMessage]);
+    });
+
     return () => {
       // Make sure to clean up any event listeners when the component unmounts
       socket.off('message');
       socket.off('login');
-      // socket.off('logout');
+      socket.off('logout');
     };
   }, [socket]);
 
@@ -38,39 +46,44 @@ const Chat = ({ socket, username }) => {
 
   useEffect(() => {
     //Listen to Typing event
-    const textBoxElement = document.getElementById('text-box');
-    textBoxElement.addEventListener('input', (event) => {
-      socket.emit('userTyping', username);
+    const typingStatusElement = document.getElementById('typing-status')
+    // const textBoxElement = chatInputRef.current;
+    
+    // Handle textbox input/typing changes
+    const handleInput = (event) => {
+        socket.emit('userTyping', username);
+  
+        clearTimeout(typingTimerId);  //cancel timeout as user keeps typing
+        typingTimerId = setTimeout(() => {
+          // User stopped typing
+          socket.emit('userStoppedTyping', username); //trigger timeout when user stops typing for a while
+        }, 500);
+      };
 
-      clearTimeout(typingTimerId);  //cancel timeout as user keeps typing
-      typingTimerId = setTimeout(() => {
-        // User stopped typing
-        socket.emit('userStoppedTyping', username); //trigger timeout when user stops typing for a while
-      }, 500);
+    // Add event listener
+    textBoxElement?.addEventListener('input', handleInput);
 
-    });
     // Listen for typing event broadcast from server
     socket.on('userTypingBroadcast', (username)=>{
-      typingStatusElement.innerText = `${username} is typing...`
+      if (typingStatusElement) {
+        console.log('Typing status event triggered')
+        typingStatusElement.innerHTML = `<i>${username} is typing...</i>`;
+      }
     });
 
     // Listen for typing stopped event broadcast from server
     socket.on('userStoppedTypingBroadcast', ()=>{
-      typingStatusElement.innerText = '';
+      if (typingStatusElement) {
+        typingStatusElement.innerText = '';
+      }
     });
-  }, []);
 
-  /* useEffect(() => {
-    socket.on('logout', (data) => {
-      // Append login notification to the chat history
-      const newMessage = JSON.parse(data)
-      console.log(newMessage)
-      setChatHistory((prevHistory) => [...prevHistory, newMessage]);
-      console.log(chatHistory)
-    });
-  }, [socket]) */
-  
-  
+    // Remove event listener when component unmounts
+    return () => {
+      textBoxElement?.removeEventListener('input', handleInput);
+    };
+
+  }, [chatInputRef.current]);
   
 
   const handleMessageSubmit = (event) => {
@@ -110,8 +123,20 @@ const Chat = ({ socket, username }) => {
               }
             >
               <div className='chat-message-text'>
-                {entry.message.text}
+                {entry.message.userId === socket.id ? (
+                  // Display the message without the sender's name
+                  entry.message.text.substring(entry.message.text.indexOf(':') + 1).trim()
+                ) : (
+                  // Display the message with the sender's name highlighted
+                  <>
+                    <span style={{ color: '#DC143C', fontSize:'0.8rem' }}>
+                      {entry.message.text.substring(0, entry.message.text.indexOf(':'))}
+                    </span>{' '}
+                    {entry.message.text.substring(entry.message.text.indexOf(':') + 1).trim()}
+                  </>
+                )}
               </div>
+
             </li>
           ))}
         </ul>

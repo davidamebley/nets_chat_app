@@ -46,6 +46,8 @@ body {
   text-align: center;
   color: #888;
   margin-bottom: 1rem;
+  list-style: none;
+  z-index: 1;
 }
 
 .chat-message {

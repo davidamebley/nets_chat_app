@@ -36,11 +36,12 @@ function App() {
   }, [socket]);
 
   // Function to handle Login connections
-  const handleLogin = (serverAddress, username) => {
+  const handleLogin = (serverAddress, newUsername) => {
     // console.log(`Login location: ${getCurrentLocation()}`);
     setServerUrl(serverAddress);
     if (socket) {
-      socket.disconnect();
+      socket.emit('user-disconnect', username);
+      socket.io.disconnect();
     }
     fetch(`/connect`, {
       method: 'POST',
@@ -50,46 +51,26 @@ function App() {
       body: JSON.stringify({ serverUrl: serverAddress }),
     })
       .then(async (response) => {
-        if (response.status === 200 && !socket) {
-          const newSocket = io(serverAddress, {
-            transports: ['websocket'],
-            query: { username },
-          });
-          setSocket(newSocket);
-          setUsername(username);
-          setGeoLocation(getCurrentLocation());
-          if (newSocket) {
-            newSocket.emit('login', {
-              login:{
-                username: `${username}`,
-                location: `${geoLocation}`
-              }
-            })
-          }
-          console.log(`Username: ${username}; Socket: ${newSocket}`)
-        } else if (response.status === 405) {
-          const newSocket = io(serverAddress, {
-            transports: ['websocket'],
-            query: { username },
-          });
-          setSocket(newSocket);
-          setUsername(username);
-          setGeoLocation(getCurrentLocation());
-          if (newSocket) {
-            newSocket.emit('login', {
-              login:{
-                username: `${username}`,
-                location: `${geoLocation}`
-              }
-            })
-          }
-          console.log(`Username: ${username}; Socket: ${newSocket}`)
-          // console.log(`New socket client with existing socket server port`)
-          // setIsServerError(true);
-          // setErrorText(await response.text());
-        } else {
-          console.error('WebSocket server connection failed');
+        const newSocket = io(serverAddress, {
+          transports: ['websocket'],
+          query: { newUsername },
+        });
+        setSocket(newSocket);
+        setUsername(newUsername);
+        setGeoLocation(getCurrentLocation());
+        if (newSocket) {
+          newSocket.emit('login', {
+            login: {
+              username: `${newUsername}`,
+              location: `${geoLocation}`
+            }
+          })
         }
+        const statusMessage = response.status === 200 || response.status === 405
+          ? `Username: ${newUsername}; Socket: ${newSocket}`
+          : 'WebSocket server connection failed';
+        console.log(statusMessage);
+        
       })
       .catch((error) => {
         console.error(error);

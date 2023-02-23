@@ -16,20 +16,19 @@ app.use(bodyParser.json());
 app.post('/connect', async (req, res) => {
     const { serverUrl } = req.body;
     const socketPort = new URL(serverUrl).port;
+    let currentUser;
 
     if (serverUrl) {
-        console.log('Received server address:', serverUrl);
+        // console.log('Received server address:', serverUrl);
     
         try {
           const inUse = await checkPortInUse(socketPort);
     
           if (inUse) {
-            console.log('Port already in use.');
+            // console.log('Port already in use.');
             res.status(405).send('Port already in use.');   //Operation not allowed
             return;
           }
-    
-          console.log('Outside reached');
     
           const io = socketIO(httpServer, {
             cors: {
@@ -43,13 +42,14 @@ app.post('/connect', async (req, res) => {
           res.status(200).send('WebSocket connection established');
     
           io.on('connection', (socket) => {
-            console.log('WebSocket connection established');
+            // console.log('WebSocket connection established');
     
             socket.on('message', (data) => {
                 const receivedMessage = JSON.stringify(data);
-                console.log(`Received message: ${receivedMessage}`);
+                // console.log(`Received message: ${receivedMessage}`);
+
                 // Broadcast to ALL clients
-                console.log(`User ID of message: ${data.message.userId}`)
+                // console.log(`User ID of message: ${data.message.userId}`)
                 // io.emit('message', receivedMessage);
                 io.emit('message', JSON.stringify(
                     {
@@ -65,7 +65,7 @@ app.post('/connect', async (req, res) => {
             socket.on('login', (data) =>{
                 const username = data.login.username;
                 const location = data.login.location;
-                console.log(`New Login: ${data.login.username}`);
+                // console.log(`New Login: ${data.login.username}`);
                 // Broadcast to other clients
                 socket.broadcast.emit('login', JSON.stringify(
                     {   type: 'login',
@@ -74,8 +74,7 @@ app.post('/connect', async (req, res) => {
                         }
                     }
                 ));
-
-                socket.username = data.login.username;
+                currentUser = data.login.username;
             });
 
 
@@ -83,6 +82,7 @@ app.post('/connect', async (req, res) => {
             socket.on('userTyping', (username)=>{
                 // Emit typing status to other users
                 socket.broadcast.emit('userTypingBroadcast', username);
+                // console.log('Typing event caught on server')
             });
             //Listen for stopped typing event
             socket.on('userStoppedTyping', ()=>{
@@ -91,13 +91,13 @@ app.post('/connect', async (req, res) => {
             });
 
     
-            socket.on('disconnect', (data) => {
-              console.log('WebSocket connection closed');
+            socket.on('disconnect', () => {
+            //   console.log(`WebSocket connection closed`);
               socket.broadcast.emit('logout', JSON.stringify(
                 {
                     type: 'logout',
                     message:{
-                        text: `${socket.username} left the chat`
+                        text: `${currentUser} left the chat`
                     }
                 }
               ))
@@ -106,13 +106,13 @@ app.post('/connect', async (req, res) => {
     
           io.on('error', (error) => {
             if (error.code === 'EADDRINUSE') {
-              console.error('Port already in use:', error);
+            //   console.error('Port already in use:', error);
             } else {
-              console.error('WebSocket server error:', error);
+            //   console.error('WebSocket server error:', error);
             }
           });
         } catch (error) {
-          console.error('Error checking if port is in use:', error);
+        //   console.error('Error checking if port is in use:', error);
           res.status(500).send('Error checking if port is in use');
         }
       } else {
