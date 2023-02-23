@@ -66,7 +66,6 @@ const Chat = ({ socket, username }) => {
     // Listen for typing event broadcast from server
     socket.on('userTypingBroadcast', (username)=>{
       if (typingStatusElement) {
-        console.log('Typing status event triggered')
         typingStatusElement.innerHTML = `<i>${username} is typing...</i>`;
       }
     });

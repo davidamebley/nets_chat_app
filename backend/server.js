@@ -1,4 +1,6 @@
 const http = require('http');
+const path = require('path');
+require('dotenv').config();
 const express = require('express');
 const socketIO = require('socket.io');
 const bodyParser = require('body-parser');
@@ -11,6 +13,23 @@ const httpServer = http.createServer(app);
 // Parse incoming request bodies in a middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Serve Frontend
+if (process.env.NODE_ENV === 'production') {
+    //Set the Build folder for our React Frontend
+    app.use(express.static(path.join(__dirname, '../frontend/build')));
+    // Serve Static Index html file when other routes visited
+    app.get('*', (req, res) =>
+        res.sendFile(
+            path.resolve(__dirname, '../', 'frontend', 'build', 'index.html')
+        )
+    )
+}else{
+    app.get('/', (req, res) =>
+        res.send('Please set to a Production Environment first')
+    )
+}
+
 
 // Define a POST route that accepts input values
 app.post('/connect', async (req, res) => {
@@ -121,6 +140,6 @@ app.post('/connect', async (req, res) => {
 });
 
 
-httpServer.listen(8000, () => {
+httpServer.listen(process.env.PORT || 8000, () => {
   console.log('HTTP server listening on port 8000');
 });

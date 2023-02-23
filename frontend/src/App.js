@@ -21,11 +21,11 @@ function App() {
     if (socket) {
       socket.on('connect', () => {
         console.log(`Connected to server at ${serverUrl}`);
-        console.log(`Socket ID: ${socket.id}`);
+        // console.log(`Socket ID: ${socket.id}`);
       });
 
       socket.on('message', (message) => {
-        console.log('Received message', message);
+        // console.log('Received message', message);
         setMessages((messages) => [...messages, message]);
       });
     }
@@ -69,7 +69,7 @@ function App() {
         const statusMessage = response.status === 200 || response.status === 405
           ? `Username: ${newUsername}; Socket: ${newSocket}`
           : 'WebSocket server connection failed';
-        console.log(statusMessage);
+        // console.log(statusMessage);
         
       })
       .catch((error) => {
@@ -83,7 +83,7 @@ function App() {
         // Get the user's current position
         navigator.geolocation.getCurrentPosition((position) => {
           const { latitude, longitude } = position.coords;
-          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          // console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
           setGeoLocation(`${latitude}, ${longitude}`)
         }, (error) => {
           switch (error.code) {
