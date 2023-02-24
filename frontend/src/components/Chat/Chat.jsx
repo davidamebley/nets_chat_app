@@ -35,8 +35,10 @@ const Chat = ({ socket, username }) => {
       socket.off('message');
       socket.off('login');
       socket.off('logout');
+      // socket.emit('userLeftChat', username); // notify server that user has left chat
     };
   }, [socket]);
+  
 
   useEffect(() => {
     // Scroll to the bottom of the chat history

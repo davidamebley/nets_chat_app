@@ -15,7 +15,6 @@ function App() {
   const [isServerError, setIsServerError] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [geoLocation, setGeoLocation] = useState('Unknown location');
-  const [login, setLogin] = useState({});
 
   useEffect(() => {
     if (socket) {
@@ -40,8 +39,9 @@ function App() {
     // console.log(`Login location: ${getCurrentLocation()}`);
     setServerUrl(serverAddress);
     if (socket) {
-      socket.emit('user-disconnect', username);
-      socket.io.disconnect();
+      console.log('Socket connected')
+      socket.emit('user-disconnect', newUsername);
+      // socket.io.disconnect();
     }
     fetch(`/connect`, {
       method: 'POST',

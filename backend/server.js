@@ -36,6 +36,7 @@ app.post('/connect', async (req, res) => {
     const { serverUrl } = req.body;
     const socketPort = new URL(serverUrl).port;
     let currentUser;
+    let clients = [];
 
     if (serverUrl) {
         // console.log('Received server address:', serverUrl);
@@ -61,7 +62,7 @@ app.post('/connect', async (req, res) => {
           res.status(200).send('WebSocket connection established');
     
           io.on('connection', (socket) => {
-            // console.log('WebSocket connection established');
+            // console.log(`WebSocket connection established with client ${socket.id}`);
     
             socket.on('message', (data) => {
                 const receivedMessage = JSON.stringify(data);
@@ -93,6 +94,13 @@ app.post('/connect', async (req, res) => {
                         }
                     }
                 ));
+                // Add to list of connected clients
+                clients.push(
+                    {
+                        id: socket.id,
+                        username: username
+                    }
+                )
                 currentUser = data.login.username;
             });
 
@@ -111,12 +119,22 @@ app.post('/connect', async (req, res) => {
 
     
             socket.on('disconnect', () => {
-            //   console.log(`WebSocket connection closed`);
+            //   console.log(`WebSocket connection closed from socket ${socket.id}`);
+              // Get the index of disconnected client
+              const index = clients.findIndex(client => client.id === socket.id);
+              let disconnectedUser = 'A user';
+              // Check if index exists in list
+              if (index > -1) {
+                  // Access the name property of the client object at that index
+                  disconnectedUser = clients[index].username;
+                  // If discon. client exists, remove client from list
+                  clients.splice(index, 1);
+              }
               socket.broadcast.emit('logout', JSON.stringify(
                 {
                     type: 'logout',
                     message:{
-                        text: `${currentUser} left the chat`
+                        text: `${disconnectedUser} left the chat`
                     }
                 }
               ))
