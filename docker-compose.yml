@@ -1,0 +1,12 @@
+version: '3'
+services:
+  chat-app:
+    image: dave-chat-app
+    ports:
+      - 8000:8000
+    environment:
+      - REACT_APP_SERVER_URL=http://localhost:8000
+      - PORT=8000
+      - NODE_ENV=production
+    restart: always
+    container_name: daves-chatapp
