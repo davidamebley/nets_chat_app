@@ -22,5 +22,5 @@ COPY --from=backend-build backend/ ./backend
 COPY package*.json ./
 RUN npm install --production
 EXPOSE 8000
-CMD ["npm", "run", "start-app"]
+CMD ["npm", "run", "start"]
 
