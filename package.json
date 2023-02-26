@@ -7,13 +7,12 @@
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js",
     "client": "npm start --prefix frontend",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start-app": "concurrently \"npm run start\" \"npm run client\"",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "David Amebley",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^7.6.0",
     "nodemon": "^2.0.20"
   },
   "dependencies": {
@@ -24,6 +23,7 @@
     "moment": "^2.29.4",
     "socket.io": "^4.6.0",
     "socket.io-client": "^4.6.0",
+    "concurrently": "^7.6.0",
     "ws": "^8.12.1"
   }
 }
