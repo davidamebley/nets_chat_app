@@ -39,9 +39,11 @@ body {
   justify-content: flex-end;
   background-color: #f1f0f0;
   scroll-behavior: smooth;
+  margin-bottom: 5rem;
 }
 
 .notification {
+  font-size: 0.9rem;
   font-style: italic;
   text-align: center;
   color: #888;
@@ -168,6 +170,15 @@ body {
     margin: 0 auto;
     border: 1px solid #ccc;
     border-radius: 0.5rem;
+  }
+
+  @media screen and (max-width: 480px) {
+    .notification {
+      font-size: 0.7rem;
+    }
+    .chat-message {
+      font-size: 0.7rem;
+    }
   }
   /* .chat-form {
     flex-direction: column;

@@ -49,7 +49,6 @@ const Chat = ({ socket, username }) => {
   useEffect(() => {
     //Listen to Typing event
     const typingStatusElement = document.getElementById('typing-status')
-    // const textBoxElement = chatInputRef.current;
     
     // Handle textbox input/typing changes
     const handleInput = (event) => {
