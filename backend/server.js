@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 
@@ -10,6 +11,26 @@ const io = socketIo(server, {
     methods: ['GET', 'POST', 'OPTIONS']
   }
 });
+
+// ----------- DEPLOYMENT ---------------
+// Serve Frontend
+if (process.env.NODE_ENV === 'production') {
+  //Set the Build folder for our React Frontend
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  // Serve Static Index html file when other routes visited
+  app.get('/*', (req, res) =>
+      res.sendFile(
+          path.resolve(__dirname, '../', 'frontend', 'build', 'index.html')
+      )
+  )
+
+}else{
+  app.get('/', (req, res) =>
+      res.send('Please set to a Production Environment first')
+  )
+}
+// ----------- END OF DEPLOYMENT
+
 
 let clients = [];
 
