@@ -9,3 +9,4 @@ This is a full stack app with NodeJS as the backend and ReactJS for the frontend
 
 ### Live
 View the app live here: https://netschatapp.herokuapp.com/
+**NOTE:** Use the same server address `https://netschatapp.herokuapp.com/` when asked in the Join page.
