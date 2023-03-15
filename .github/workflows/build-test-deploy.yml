@@ -30,7 +30,7 @@ jobs:
         with:
           host: ec2-35-174-208-142.compute-1.amazonaws.com
           username: Administrator
-          password: ${{ secrets.EC2_PRIVATE_KEY }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             cd "/apps/nets-chat-app/frontend/"
             git pull
