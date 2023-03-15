@@ -28,8 +28,8 @@ jobs:
 #       - name: Deploy to EC2 or EKS
 #         uses: appleboy/ssh-action@master
 #         with:
-#           host: <your EC2 or EKS instance IP address or hostname>
-#           username: <your IAM user's username>
+#           host: ec2-35-174-208-142.compute-1.amazonaws.com
+#           username: Administrator
 #           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 #           key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
 #           script: |
