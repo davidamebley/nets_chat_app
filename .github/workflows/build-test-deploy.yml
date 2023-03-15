@@ -21,8 +21,8 @@ jobs:
         run: |
           cd frontend
           npm run build
-#       - name: Test
-#         run: npm test
+      - name: Test
+        run: npm test
 #       - name: Deploy to EC2 or EKS
 #         uses: appleboy/ssh-action@master
 #         with:
