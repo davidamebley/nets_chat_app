@@ -25,15 +25,15 @@ jobs:
 #         run: |
 #           cd frontend
 #           npm run test
-#       - name: Deploy to EC2 or EKS
-#         uses: appleboy/ssh-action@master
-#         with:
-#           host: ec2-35-174-208-142.compute-1.amazonaws.com
-#           username: Administrator
-#           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
-#           script: |
-#             cd /path/to/your/application
-#             git pull
-#             npm install
-#             npm run build
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ec2-35-174-208-142.compute-1.amazonaws.com
+          username: Administrator
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          script: |
+            cd "/apps/nets-chat-app/frontend/"
+            git pull
+            npm install
+            npm run build
