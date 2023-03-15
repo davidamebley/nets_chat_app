@@ -1,0 +1,31 @@
+name: Build, Test, Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test
+#       - name: Deploy to EC2 or EKS
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: <your EC2 or EKS instance IP address or hostname>
+#           username: <your IAM user's username>
+#           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+#           script: |
+#             cd /path/to/your/application
+#             git pull
+#             npm install
+#             npm run build
